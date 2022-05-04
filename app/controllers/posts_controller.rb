@@ -7,7 +7,7 @@ class PostsController < ApplicationController
   rescue_from ActiveRecord::RecordInvalid do |e|
     render json: { error: e.message }, status: :unprocessable_entity
   end
-
+ 
   # GET /posts
   def index
     @posts = Post.where(published: true)
