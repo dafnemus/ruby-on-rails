@@ -34,4 +34,76 @@ RSpec.describe "Posts", type: :request do
       expect(response).to have_http_status(200)
     end
   end
+
+  describe "POST /posts/" do
+    let!(:user) { create(:user) }
+    it "should create a new post" do
+      req_payload = {
+        post: {
+          title: "titulo",
+          content: "content",
+          published: false,
+          user_id: user.id
+        }
+      }
+
+      post "/posts", params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload["id"]).to_not be_empty
+      expect(response).to have_http_status(:created)
+
+    end
+
+    it "should return an error message on invalid post" do
+      req_payload = {
+        post: {
+          content: "content",
+          published: false,
+          user_id: user.id
+        }
+      }
+
+      post "/posts", params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload["error"]).to_not be_empty
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+
+  describe "PUT /posts/{id}" do
+    let!(:article) { create(:post) }
+    it "should create a new post" do
+      req_payload = {
+        post: {
+          title: "titulo",
+          content: "content",
+          published: true
+      }
+    }
+      put "/posts/#{article.id}", params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload["id"]).to eq(article.id)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "should return an error message on invalid post" do
+      req_payload = {
+        post: {
+          title: nil,
+          content: nil,
+          published: false,
+        }
+      }
+
+      put "/posts/#{article.id}", params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload["error"]).not_to be_empty
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
 end
